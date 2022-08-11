@@ -1,7 +1,10 @@
 package co.grandcircus.cartapi;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,5 +36,26 @@ public class ItemController {
 		ir.insert(item);
 		
 		return "Data reset.";
+	}
+	
+	@GetMapping("/cart-items")
+	public List<Item> readAll(@RequestParam(required=false) String product,
+			  @RequestParam(required=false) Double maxPrice,
+			  @RequestParam(required=false) String prefix,
+			  @RequestParam(required=false) Integer pageSize){
+		
+		if(product != null) {
+			product.equalsIgnoreCase(product);
+			return ir.findByProduct(product);
+		} else if (maxPrice != null) {
+			return ir.findByPriceLessThan(maxPrice);
+		} else if (prefix != null) {
+			prefix.equalsIgnoreCase(prefix);
+			return ir.findByProductStartingWith(prefix);
+		} else if ((pageSize != null) && (ir.findAll().size() > pageSize)) {
+			return ir.findAll().subList(0, pageSize);
+		} else {
+			return ir.findAll();
+		}
 	}
 }
